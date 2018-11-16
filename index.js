@@ -81,7 +81,46 @@ class RNUpdate extends Component {
         this.loading = false // 是否在下载中
     }
 
+    isNewVersion = (version) => {
+        if(version){
+            let newVersionArray = version.split(".");
+            let oldVersionArray = RNUpdateApp.appVersion.split(".");
+
+            for(let i = 0; i<3; i++){
+                if(!newVersionArray[i]){
+                    newVersionArray[i] = 0;
+                }
+                if(!oldVersionArray[i]){
+                    oldVersionArray[i] = 0;
+                }
+            }
+
+            if(Number(newVersionArray[0])>Number(oldVersionArray[0])){
+                return true;
+            }else if(Number(newVersionArray[0]) == Number(oldVersionArray[0])){
+                if(Number(newVersionArray[1]) > Number(oldVersionArray[1])){
+                    return true;
+                }else if(Number(newVersionArray[1]) == Number(oldVersionArray[1])){
+                    if(Number(newVersionArray[2]) > Number(oldVersionArray[2])){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            false;
+        }
+    }
+
     checkUpdate(fetchRes, isManual) {
+        if(!fetchRes){
+            return;
+        }
         try {
             this.fetchRes = fetchRes
             let {version, desc} = fetchRes
@@ -93,7 +132,7 @@ class RNUpdate extends Component {
             }
 
 
-            if (version > RNUpdateApp.appVersion) {
+            if (this.isNewVersion(version)) {
                 try {
                     RNUpdateApp.getFileSize(this.fetchRes.url).then(async fileSize => {
                         fileSize = Number(fileSize / 1024 / 1024).toFixed(2, 10)
